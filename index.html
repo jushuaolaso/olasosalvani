@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay Complaint Management System</title>
+    <link rel="stylesheet" href="frontend/css/styles.css">
+    <link rel="stylesheet" href="frontend/css/map.css">
+</head>
+<body>
+    <!-- Login Container -->
+    <div id="loginContainer" class="container auth-container">
+        <div class="auth-box">
+            <h1>Barangay Complaint Management System</h1>
+            <p class="subtitle">File or manage resident complaints</p>
+            
+            <form id="loginForm" class="form">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userType">User Type</label>
+                    <select id="userType" required>
+                        <option value="">Select user type</option>
+                        <option value="resident">Resident</option>
+                        <option value="admin">Admin/Barangay Staff</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Demo credentials:</p>
+                <p><strong>Resident:</strong> resident@example.com / pass123</p>
+                <p><strong>Admin:</strong> admin@example.com / admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardContainer" class="container dashboard-hidden">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <h2>Barangay Complaint Management</h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <!-- Populated by JavaScript -->
+            </ul>
+            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content-wrapper">
+            <!-- Resident Dashboard -->
+            <div id="residentDashboard" class="page hidden">
+                <h2>Resident Dashboard</h2>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>File a New Complaint</h3>
+                        <p>Report an issue in your barangay</p>
+                        <button class="btn btn-primary" onclick="showPage('residentFileComplaint')">File Complaint</button>
+                    </div>
+                    <div class="card">
+                        <h3>View My Complaints</h3>
+                        <p>Check the status of your submissions</p>
+                        <button class="btn btn-primary" onclick="showPage('residentComplaintsList')">View Complaints</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="page hidden">
+                <h2>Admin Dashboard</h2>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Record Walk-In Complaint</h3>
+                        <p>Add complaints from in-person visitors</p>
+                        <button class="btn btn-primary" onclick="showPage('adminWalkInComplaint')">Add Walk-In</button>
+                    </div>
+                    <div class="card">
+                        <h3>View All Complaints</h3>
+                        <p>Review and manage all complaints</p>
+                        <button class="btn btn-primary" onclick="showPage('adminComplaintsList')">View All</button>
+                    </div>
+                    <div class="card">
+                        <h3>Location-Based Reports</h3>
+                        <p>View complaints by location on map</p>
+                        <button class="btn btn-primary" onclick="showPage('adminLocationReport')">View Reports</button>
+                    </div>
+                    <div class="card">
+                        <h3>All Reports</h3>
+                        <p>Generate statistical reports</p>
+                        <button class="btn btn-primary" onclick="showPage('adminReports')">Reports</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resident File Complaint -->
+            <div id="residentFileComplaint" class="page hidden">
+                <h2>File a Complaint</h2>
+                <form id="residentComplaintForm" class="form">
+                    <div class="form-section">
+                        <h3>Complaint Details</h3>
+                        <div class="form-group">
+                            <label for="complaintTitle">Complaint Title</label>
+                            <input type="text" id="complaintTitle" placeholder="Brief title of the complaint" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="complaintDescription">Description</label>
+                            <textarea id="complaintDescription" placeholder="Detailed description of the complaint" rows="5" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="complaintCategory">Category</label>
+                            <select id="complaintCategory" required>
+                                <option value="">Select category</option>
+                                <option value="Noise Disturbance">Noise Disturbance</option>
+                                <option value="Road/Infrastructure">Road/Infrastructure</option>
+                                <option value="Waste Management">Waste Management</option>
+                                <option value="Water Supply">Water Supply</option>
+                                <option value="Stray Animals">Stray Animals</option>
+                                <option value="Illegal Activities">Illegal Activities</option>
+                                <option value="Health/Safety">Health/Safety</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Complaint Location</h3>
+                        <div class="form-group">
+                            <label for="residentLocationSearch">Search Location / Address</label>
+                            <div class="input-group">
+                                <input type="text" id="residentLocationSearch" placeholder="Search barangay, street, landmark, or address">
+                                <button type="button" class="btn btn-secondary" onclick="searchLocationResident()">Search Location</button>
+                            </div>
+                        </div>
+
+                        <div id="residentMapContainer" class="map-container">
+                            <!-- Map will be initialized here -->
+                        </div>
+
+                        <div class="map-controls">
+                            <button type="button" class="btn btn-secondary" onclick="useCurrentLocationResident()">Use My Current Location</button>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="residentLatitude">Latitude</label>
+                                <input type="text" id="residentLatitude" placeholder="0.0000" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="residentLongitude">Longitude</label>
+                                <input type="text" id="residentLongitude" placeholder="0.0000" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="residentAddress">Location / Address</label>
+                            <input type="text" id="residentAddress" placeholder="Address will appear here" readonly>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary" onclick="confirmLocationResident()">Confirm Location</button>
+                        <div id="residentLocationStatus" class="status-message"></div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Upload Evidence (Optional)</h3>
+                        <div class="form-group">
+                            <label for="residentEvidence">Upload Photo/Document</label>
+                            <input type="file" id="residentEvidence" accept="image/*,.pdf" multiple>
+                            <small>Max 3 files, PNG/JPG/PDF, 5MB each</small>
+                        </div>
+                        <div id="residentFilePreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Submit Complaint</button>
+                        <button type="button" class="btn btn-secondary" onclick="showPage('residentDashboard')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Resident Complaints List -->
+            <div id="residentComplaintsList" class="page hidden">
+                <h2>My Complaints</h2>
+                <div id="residentComplaintsContainer" class="complaints-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Resident Complaint Details -->
+            <div id="residentComplaintDetails" class="page hidden">
+                <button class="btn btn-secondary" onclick="showPage('residentComplaintsList')">← Back to List</button>
+                <div id="residentComplaintDetailsContent">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Admin Walk-In Complaint -->
+            <div id="adminWalkInComplaint" class="page hidden">
+                <h2>Record Walk-In Complaint</h2>
+                <form id="adminWalkInForm" class="form">
+                    <div class="form-section">
+                        <h3>Resident Information</h3>
+                        <div class="form-group">
+                            <label for="walkInResidentName">Resident Name</label>
+                            <input type="text" id="walkInResidentName" placeholder="Full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="walkInResidentEmail">Email (Optional)</label>
+                            <input type="email" id="walkInResidentEmail" placeholder="Email address">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="walkInResidentPhone">Phone Number (Optional)</label>
+                            <input type="tel" id="walkInResidentPhone" placeholder="Contact number">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Complaint Details</h3>
+                        <div class="form-group">
+                            <label for="walkInComplaintTitle">Complaint Title</label>
+                            <input type="text" id="walkInComplaintTitle" placeholder="Brief title of the complaint" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="walkInComplaintDescription">Description</label>
+                            <textarea id="walkInComplaintDescription" placeholder="Detailed description" rows="5" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="walkInComplaintCategory">Category</label>
+                            <select id="walkInComplaintCategory" required>
+                                <option value="">Select category</option>
+                                <option value="Noise Disturbance">Noise Disturbance</option>
+                                <option value="Road/Infrastructure">Road/Infrastructure</option>
+                                <option value="Waste Management">Waste Management</option>
+                                <option value="Water Supply">Water Supply</option>
+                                <option value="Stray Animals">Stray Animals</option>
+                                <option value="Illegal Activities">Illegal Activities</option>
+                                <option value="Health/Safety">Health/Safety</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Complaint Location</h3>
+                        <div class="form-group">
+                            <label for="adminLocationSearch">Search Location / Address</label>
+                            <div class="input-group">
+                                <input type="text" id="adminLocationSearch" placeholder="Search barangay, street, landmark, or address">
+                                <button type="button" class="btn btn-secondary" onclick="searchLocationAdmin()">Search Location</button>
+                            </div>
+                        </div>
+
+                        <div id="adminMapContainer" class="map-container">
+                            <!-- Map will be initialized here -->
+                        </div>
+
+                        <div class="map-controls">
+                            <button type="button" class="btn btn-secondary" onclick="useCurrentLocationAdmin()">Use Current Location</button>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="adminLatitude">Latitude</label>
+                                <input type="text" id="adminLatitude" placeholder="0.0000" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="adminLongitude">Longitude</label>
+                                <input type="text" id="adminLongitude" placeholder="0.0000" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="adminAddress">Location / Address</label>
+                            <input type="text" id="adminAddress" placeholder="Address will appear here" readonly>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary" onclick="confirmLocationAdmin()">Confirm Location</button>
+                        <div id="adminLocationStatus" class="status-message"></div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Upload Evidence (Optional)</h3>
+                        <div class="form-group">
+                            <label for="adminEvidence">Upload Photo/Document</label>
+                            <input type="file" id="adminEvidence" accept="image/*,.pdf" multiple>
+                            <small>Max 3 files, PNG/JPG/PDF, 5MB each</small>
+                        </div>
+                        <div id="adminFilePreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Walk-In Complaint</button>
+                        <button type="button" class="btn btn-secondary" onclick="showPage('adminDashboard')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Admin Complaints List -->
+            <div id="adminComplaintsList" class="page hidden">
+                <h2>All Complaints</h2>
+                <div class="filter-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminFilterStatus">Status</label>
+                            <select id="adminFilterStatus" onchange="filterAdminComplaints()">
+                                <option value="">All Status</option>
+                                <option value="Submitted">Submitted</option>
+                                <option value="Under Review">Under Review</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminFilterCategory">Category</label>
+                            <select id="adminFilterCategory" onchange="filterAdminComplaints()">
+                                <option value="">All Categories</option>
+                                <option value="Noise Disturbance">Noise Disturbance</option>
+                                <option value="Road/Infrastructure">Road/Infrastructure</option>
+                                <option value="Waste Management">Waste Management</option>
+                                <option value="Water Supply">Water Supply</option>
+                                <option value="Stray Animals">Stray Animals</option>
+                                <option value="Illegal Activities">Illegal Activities</option>
+                                <option value="Health/Safety">Health/Safety</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminFilterType">Type</label>
+                            <select id="adminFilterType" onchange="filterAdminComplaints()">
+                                <option value="">All Types</option>
+                                <option value="ONLINE">Online</option>
+                                <option value="WALK-IN">Walk-In</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="adminComplaintsContainer" class="complaints-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Admin Complaint Details -->
+            <div id="adminComplaintDetails" class="page hidden">
+                <button class="btn btn-secondary" onclick="showPage('adminComplaintsList')">← Back to List</button>
+                <div id="adminComplaintDetailsContent">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Admin Location-Based Reports -->
+            <div id="adminLocationReport" class="page hidden">
+                <h2>Location-Based Complaint Report</h2>
+                
+                <div class="filter-section">
+                    <h3>Filter Complaints</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="locationReportDateFrom">Date From</label>
+                            <input type="date" id="locationReportDateFrom" onchange="updateLocationReportMap()">
+                        </div>
+                        <div class="form-group">
+                            <label for="locationReportDateTo">Date To</label>
+                            <input type="date" id="locationReportDateTo" onchange="updateLocationReportMap()">
+                        </div>
+                        <div class="form-group">
+                            <label for="locationReportCategory">Category</label>
+                            <select id="locationReportCategory" onchange="updateLocationReportMap()">
+                                <option value="">All Categories</option>
+                                <option value="Noise Disturbance">Noise Disturbance</option>
+                                <option value="Road/Infrastructure">Road/Infrastructure</option>
+                                <option value="Waste Management">Waste Management</option>
+                                <option value="Water Supply">Water Supply</option>
+                                <option value="Stray Animals">Stray Animals</option>
+                                <option value="Illegal Activities">Illegal Activities</option>
+                                <option value="Health/Safety">Health/Safety</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="locationReportStatus">Status</label>
+                            <select id="locationReportStatus" onchange="updateLocationReportMap()">
+                                <option value="">All Status</option>
+                                <option value="Submitted">Submitted</option>
+                                <option value="Under Review">Under Review</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="locationReportType">Type</label>
+                            <select id="locationReportType" onchange="updateLocationReportMap()">
+                                <option value="">All Types</option>
+                                <option value="ONLINE">Online</option>
+                                <option value="WALK-IN">Walk-In</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="updateLocationReportMap()">Generate Report</button>
+                </div>
+
+                <div id="locationReportMapContainer" class="map-container" style="min-height: 600px;">
+                    <!-- Map will be initialized here -->
+                </div>
+
+                <div id="locationReportStats" class="report-stats">
+                    <!-- Stats will be populated here -->
+                </div>
+            </div>
+
+            <!-- Admin Reports -->
+            <div id="adminReports" class="page hidden">
+                <h2>Reports</h2>
+                <div class="report-tabs">
+                    <button class="tab-btn active" onclick="generateComplaintSummary()">Complaint Summary</button>
+                    <button class="tab-btn" onclick="generateCategoryReport()">By Category</button>
+                    <button class="tab-btn" onclick="generateStatusReport()">By Status</button>
+                    <button class="tab-btn" onclick="generateTypeReport()">By Type</button>
+                </div>
+                <div id="reportContent" class="report-content">
+                    <!-- Report content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="spinner"></div>
+            <p id="loadingMessage">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Alert/Message Modal -->
+    <div id="alertModal" class="modal hidden">
+        <div class="modal-content alert-content">
+            <p id="alertMessage"></p>
+            <button class="btn btn-primary" onclick="closeAlert()">OK</button>
+        </div>
+    </div>
+
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="frontend/js/app.js"></script>
+    <script src="frontend/js/map.js"></script>
+    <script src="frontend/js/auth.js"></script>
+    <script src="frontend/js/complaints.js"></script>
+    <script src="frontend/js/reports.js"></script>
+</body>
+</html>
